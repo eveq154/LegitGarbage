@@ -10,9 +10,30 @@
 using namespace cv;
 using namespace std;
 
-int initX = 530, initY = 450;
-
 int theDISTANCE;
+
+Mat spookyScarySkeletons(Mat &src)
+{
+    Mat skel(src.size(), CV_8UC1, cv::Scalar(0));
+    cv::Mat temp;
+    cv::Mat eroded;
+
+    Mat element = getStructuringElement(MORPH_CROSS, Size(3, 3));
+
+    bool done;
+    do
+    {
+      erode(src, eroded, element);
+      dilate(eroded, temp, element); // temp = open(src)
+      subtract(src, temp, temp);
+      bitwise_or(skel, temp, skel);
+      eroded.copyTo(src);
+
+      done = (countNonZero(src) == 0);
+    } while (!done);
+
+    return skel;
+}
 
 Mat getROI(Mat &m, int x, int y, int width, int height, bool onBlank)
 {
@@ -69,7 +90,7 @@ float calcSlope( Vec4i lines)
     return tan(slope) * 180 / CV_PI;
 }
 
-static std::array<int, 3> cross(const std::array<int, 3> &a, const std::array<int, 3> &b)
+std::array<int, 3> cross(const std::array<int, 3> &a, const std::array<int, 3> &b)
 {
     std::array<int, 3> result;
     result[0] = a[1] * b[2] - a[2] * b[1];
@@ -78,7 +99,7 @@ static std::array<int, 3> cross(const std::array<int, 3> &a, const std::array<in
     return result;
 }
 
-static bool get_intersection(const cv::Vec4i &line_a, const cv::Vec4i &line_b, vector<cv::Point2f> &intersection)
+bool get_intersection(const cv::Vec4i &line_a, const cv::Vec4i &line_b, vector<cv::Point2f> &intersection)
 {
     cv::Point intersec;
     std::array<int, 3> pa{ { line_a[0], line_a[1], 1 } };
@@ -102,7 +123,7 @@ static bool get_intersection(const cv::Vec4i &line_a, const cv::Vec4i &line_b, v
     }
 }
 
-static vector<Point2f> transformers(Mat &input, Mat &output, vector<Point2f> objPts)
+vector<Point2f> transformers(Mat &input, Mat &output, vector<Point2f> objPts)
 {
     Mat transMat;
 
@@ -111,15 +132,20 @@ static vector<Point2f> transformers(Mat &input, Mat &output, vector<Point2f> obj
     vector<Point2f> tempPoints;
 
     tempPoints.push_back(Point2f(centerOfFrame.x + 10, centerOfFrame.y + 50));
-    tempPoints.push_back(Point2f(centerOfFrame.x + 10, centerOfFrame.y + 350));
+    tempPoints.push_back(Point2f(centerOfFrame.x + 10, centerOfFrame.y + 360));
     tempPoints.push_back(Point2f(centerOfFrame.x - 10, centerOfFrame.y + 50));
-    tempPoints.push_back(Point2f(centerOfFrame.x - 10, centerOfFrame.y + 350));
+    tempPoints.push_back(Point2f(centerOfFrame.x - 10, centerOfFrame.y + 360));
 
-    transMat = cv::getPerspectiveTransform(objPts, tempPoints);
+    transMat = getPerspectiveTransform(objPts, tempPoints);
 
-    cv::warpPerspective( input, output, transMat, input.size() );
+    warpPerspective( input, output, transMat, input.size() );
 
     theDISTANCE = tempPoints[0].x - tempPoints[2].x;
+
+    for (int i = 0; i < tempPoints.size(); i++)
+    {
+        circle(input, tempPoints[i], 1, Scalar(255, 0, 0));
+    }
 
     return tempPoints;
 }
@@ -131,7 +157,7 @@ bool oneTime(const Vec4i& _l1, const Vec4i& _l2)
     int upperDistance = l1[0] - l2[0];
     int lowerDistance = l1[2] - l2[2];
 
-    if ( abs(upperDistance - theDISTANCE) < 2 && abs(lowerDistance - theDISTANCE) < 2 && abs(upperDistance - lowerDistance) < 2 )
+    if ( abs(upperDistance - theDISTANCE) < 1 && abs(lowerDistance - theDISTANCE) < 1 && abs(upperDistance - lowerDistance) < 1 )
         return true;
 
     return false;
@@ -152,7 +178,12 @@ vector<Vec4i> findSomeRealShit(vector<Vec4i> &lines){
 
     return result;
 }
-
+/*
+void findROIs(Mat &src, int initX, int initY)
+{
+    Mat currentROI = getROI(src, initX, initY, )
+}
+*/
 util::util()
 {
 

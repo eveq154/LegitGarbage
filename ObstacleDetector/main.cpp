@@ -9,8 +9,10 @@ using namespace std;
 Mat src, src_warped, src_canny, src_blur, dst, blank, M;
 
 int angle = 34, angle1 = 47;
+int initX = 530, initY = 450;
+int ROIX = 605, ROIY = 660;
 
-int thresh = 50;
+int thresh = 21;
 
 vector<Vec4i> linesP, rails, leftLegitRails, rightLegitRails, legitRails;
 vector<Vec2f> lines;
@@ -110,25 +112,29 @@ int main() {
             foundInter = true;
         }
 
-        huinter = transformers(src, src, inter);
 
-        Mat blank = getROI(src, initX + 50, initY, 120, 100, true);
+        huinter = transformers(src, src_warped, inter);
+
+        Mat blank = getROI(src_warped, ROIX, ROIY, 70, 50, true);
 
         prepare(blank, src_canny);
 
-        HoughLinesP(src_canny, linesP, 1, 1 * CV_PI/90, thresh, 90, 10);
+        Mat skel = spookyScarySkeletons(src_canny);
+
+        HoughLinesP(skel, linesP, 1, 2 * CV_PI/90, thresh, 20, 15);
 
         vector<Vec4i> realShit = findSomeRealShit(linesP);
 
         for (int i = 0; i < realShit.size(); i++)
         {
             Vec4i l = realShit[i];
-            line(src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 0, 0), 2);
+            line(src_warped, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 0, 0), 3);
         }
 
-        rectangle(src, Rect(initX + 50, initY, 120, 100), Scalar(0, 255, 0), 2);
+        rectangle(src_warped, Rect(ROIX, ROIY, 70, 50), Scalar(0, 255, 0), 2);
 
-        imshow("Result", src);
+
+        imshow("Result", src_warped);
 
         int k = waitKey(1);
         if (k == 27)

@@ -56,6 +56,7 @@ void prepare(Mat src, Mat &dst)
     cvtColor( src, src_blur, CV_BGR2GRAY );
 
     adaptiveThreshold(~src_blur, dst, 255, CV_ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 15, -3);
+
 }
 
 bool isEqual(const Vec4i& _l1, const Vec4i& _l2)
@@ -86,8 +87,7 @@ bool isEqual(const Vec4i& _l1, const Vec4i& _l2)
 float calcSlope( Vec4i lines)
 {
     float x1 = lines[0], y1= lines[1], x2 = lines[2], y2= lines[3];
-    float slope = (y2-y1)/(x2-x1);
-    return tan(slope) * 180 / CV_PI;
+    return atan2(y2-y1, x2-x1) * 180 / CV_PI;
 }
 
 std::array<int, 3> cross(const std::array<int, 3> &a, const std::array<int, 3> &b)
@@ -131,9 +131,9 @@ vector<Point2f> transformers(Mat &input, Mat &output, vector<Point2f> objPts)
 
     vector<Point2f> tempPoints;
 
-    tempPoints.push_back(Point2f(centerOfFrame.x + 10, centerOfFrame.y + 50));
+    tempPoints.push_back(Point2f(centerOfFrame.x + 10, centerOfFrame.y + 150));
     tempPoints.push_back(Point2f(centerOfFrame.x + 10, centerOfFrame.y + 360));
-    tempPoints.push_back(Point2f(centerOfFrame.x - 10, centerOfFrame.y + 50));
+    tempPoints.push_back(Point2f(centerOfFrame.x - 10, centerOfFrame.y + 150));
     tempPoints.push_back(Point2f(centerOfFrame.x - 10, centerOfFrame.y + 360));
 
     transMat = getPerspectiveTransform(objPts, tempPoints);
@@ -154,10 +154,12 @@ bool oneTime(const Vec4i& _l1, const Vec4i& _l2)
 {
     Vec4i l1(_l1), l2(_l2);
 
-    int upperDistance = l1[0] - l2[0];
-    int lowerDistance = l1[2] - l2[2];
+    int upperDistance = sqrt(pow((l1[0] - l2[0]), 2) + pow((l1[1] - l2[1]), 2));
+    int lowerDistance = sqrt(pow((l1[2] - l2[2]), 2) + pow((l1[3] - l2[3]), 2));
 
-    if ( abs(upperDistance - theDISTANCE) < 1 && abs(lowerDistance - theDISTANCE) < 1 && abs(upperDistance - lowerDistance) < 1 )
+    float slope1 = calcSlope(l1), slope2 = calcSlope(l2);
+
+    if ( slope1 - slope2 < 0 ) //abs(upperDistance - theDISTANCE) < 4 && abs(lowerDistance - theDISTANCE) < 4 &&
         return true;
 
     return false;
@@ -168,22 +170,16 @@ vector<Vec4i> findSomeRealShit(vector<Vec4i> &lines){
 
     for (int i = 0; i < lines.size(); i++){
         for (int j = 0; j < lines.size(); j++){
-            if ( oneTime(lines[i], lines[j]) ){
+            if (i != j && oneTime(lines[i], lines[j]) ){
                 result.push_back(lines[i]);
                 result.push_back(lines[j]);
-                i++;
             }
         }
     }
 
     return result;
 }
-/*
-void findROIs(Mat &src, int initX, int initY)
-{
-    Mat currentROI = getROI(src, initX, initY, )
-}
-*/
+
 util::util()
 {
 

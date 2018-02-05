@@ -112,16 +112,15 @@ int main() {
             foundInter = true;
         }
 
-
         huinter = transformers(src, src_warped, inter);
 
-        Mat blank = getROI(src_warped, ROIX, ROIY, 70, 50, true);
+        prepare(src_warped, src_canny);
 
-        prepare(blank, src_canny);
+        Mat blank = getROI(src_canny, ROIX, ROIY, 70, 50, true);
 
-        Mat skel = spookyScarySkeletons(src_canny);
+        Mat skel = spookyScarySkeletons(blank);
 
-        HoughLinesP(skel, linesP, 1, 2 * CV_PI/90, thresh, 20, 15);
+        HoughLinesP(skel, linesP, 1, CV_PI/180, thresh, 20, 300);
 
         vector<Vec4i> realShit = findSomeRealShit(linesP);
 
@@ -131,7 +130,7 @@ int main() {
             line(src_warped, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 0, 0), 3);
         }
 
-        rectangle(src_warped, Rect(ROIX, ROIY, 70, 50), Scalar(0, 255, 0), 2);
+        rectangle(src_warped, Rect(ROIX, ROIY, 70, 50), Scalar(0, 255, 0), 1);
 
 
         imshow("Result", src_warped);

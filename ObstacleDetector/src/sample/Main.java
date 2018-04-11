@@ -19,7 +19,7 @@ public class Main extends Application
         {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
             BorderPane rootElement = (BorderPane) loader.load();
-            Scene scene = new Scene(rootElement, 800, 600);
+            Scene scene = new Scene(rootElement, 1920, 1080);
             primaryStage.setTitle("Video processing");
             primaryStage.setScene(scene);
             primaryStage.show();

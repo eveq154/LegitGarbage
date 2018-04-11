@@ -5,16 +5,16 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="10" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/opencv-340.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/opencv/build/bin/opencv-340.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/Downloads/opencv-340.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/opencv/build/bin/opencv-340.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

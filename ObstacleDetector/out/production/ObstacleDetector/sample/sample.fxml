@@ -8,7 +8,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="sample.Controller">
     <center>
-        <ImageView fx:id="currentFrame" />
+        <ImageView fx:id="Frame" />
     </center>
     <right>
         <VBox alignment="CENTER_LEFT" spacing="10">
@@ -16,6 +16,7 @@
                 <Insets left="10" right="20"/>
             </padding>
             <Text text="CONTROLS" />
+            <Button fx:id="button" alignment="center" text="Start" onAction="#start" />
         </VBox>
     </right>
     <bottom>
@@ -23,7 +24,6 @@
             <padding>
                 <Insets top="25" right="25" bottom="25" left="25"/>
             </padding>
-            <Button fx:id="button" alignment="center" text="Start camera" onAction="#startCamera" />
         </HBox>
     </bottom>
 </BorderPane>

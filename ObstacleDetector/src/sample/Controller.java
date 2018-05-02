@@ -12,6 +12,7 @@ import sample.util.Line;
 import sample.util.MyFrame;
 import sample.util.Utils;
 
+import java.awt.geom.Line2D;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,10 +31,10 @@ public class Controller {
     private ScheduledExecutorService timer;
     private VideoCapture capture;
     private boolean cameraActive;
-    private MyFrame prevFrame = new MyFrame();
     private MyFrame currFrame = new MyFrame();
     private boolean foundTransform = false;
     private Mat transformMat;
+    private Mat pointsForTransform;
 
     public void initialize() {
         this.capture = new VideoCapture();
@@ -47,7 +48,7 @@ public class Controller {
         this.Frame.setFitWidth(1920);
 
         if (!this.cameraActive) {
-            this.capture.open("/home/eveq154/IdeaProjects/ObstacleDetector/src/sample/resources/2018-02-07_15_51.avi");
+            this.capture.open("/home/eveq154/IdeaProjects/ObstacleDetector/src/sample/resources/20171206_115513778.avi");
 
             if (this.capture.isOpened()) {
                 this.cameraActive = true;
@@ -56,14 +57,13 @@ public class Controller {
 
                     currFrame = grabFrame();
 
-//                    if (!Objects.equals(prevFrame.getFrame(), null))
-//                        currFrame.Stabilize(prevFrame);
-//
                     if (!foundTransform) {
 
-                        List<Line> lines = currFrame.findLinesForTransform(new Rect(1000, 1500, 500, 500));
+                        List<Line> lines = currFrame.findLinesForTransform(new Rect(1000, 1500, 500, 200));
 
-                        Mat pointsForTransform = currFrame.findPointsForTransform(lines.get(5), lines.get(6));
+//                        currFrame.drawLines(Arrays.asList(lines.get(3), lines.get(1)));
+
+                        pointsForTransform = currFrame.findPointsForTransform(lines.get(1), lines.get(3)); // 5, 6
 
                         transformMat = currFrame.findAndPerformTransform(
                                 new Point(currFrame.getFrame().width() / 2, currFrame.getFrame().height() / 2),
@@ -77,72 +77,64 @@ public class Controller {
                     MyFrame otsu = new MyFrame(new Mat(currFrame.getFrame().size(), CvType.CV_8U));
 
                     Imgproc.warpPerspective(currFrame.getOtsu().getFrame(), otsu.getFrame(), transformMat, currFrame.getFrame().size());
+                    Imgproc.warpPerspective(currFrame.getFrame(), currFrame.getFrame(), transformMat, currFrame.getFrame().size());
+
+
+
+
 
 
                     //find rails
-//
-                    List<Line> lines = currFrame.findLines(new Rect(1000, 1500, 300, 500));
 
-                    System.out.println("lines - " + lines.size());
 
-                    List<Line> pair = new ArrayList<>();
+                    double[] leftDot = new double[]{1100, 2000};
+                    double[] rightDot = new double[]{1200, 2000};
 
-                    List<Integer> dists = new ArrayList<>();
-
-                    for (int i = 0; i < lines.size(); i++) {
-
-                        if (pair.size() == 2)
-                            break;
-
-                        for (int j = 0; j < lines.size(); j++) {
-
-                            Line l1 = lines.get(i);
-                            Line l2 = lines.get(j);
-
-                            dists.add(l1.calcDistanceTo(l2));
-
-                            if (l1.calcSlope() == l2.calcSlope()){
-                                pair.add(l1);
-                                pair.add(l2);
-                                break;
-                            }
-                        }
-                    }
-
+                    List<Line> lines = otsu.findLines(new Rect(1000, 1500, 300, 500));
                     currFrame.drawLines(lines);
 
-                    dists.stream()
-                            .filter(l -> l != -1 && l != 0)
-                            .forEach(System.out::println);
+                    List<Line> lines1 = otsu.findLines(new Rect(1000, 1000, 300, 500));
+                    currFrame.drawLines(lines1);
 
-                    //
+                    List<Line> lines2 = otsu.findLines(new Rect(1000, 500, 300, 500));
+                    currFrame.drawLines(lines2);
 
-
-
-//                    LineSegmentDetector detector = createLineSegmentDetector();
-//                    Mat lines = new Mat();
-//                    Mat blank = new Mat(currFrame.getFrame().size(), CvType.CV_8U);
-//                    detector.detect(currFrame.getOtsu().getROI(new Rect(1000, 1500, 500, 500)).getFrame(), lines);
-//
-//                    detector.drawSegments(currFrame.getFrame(), lines);
+                    List<Line> lines3 = otsu.findLines(new Rect(1000, 0, 300, 500));
+                    currFrame.drawLines(lines3);
 
 
 
-//                    line(currFrame.getFrame(), new Point(1000, 1500), new Point(1500, 1500), new Scalar(255, 0, 0));
-                    rectangle(currFrame.getFrame(), new Point(1000, 1500), new Point(1300, 2000), new Scalar(0, 255, 0));
+
+                    // dots
+                    line(currFrame.getFrame(), new Point(leftDot[0], leftDot[1]), new Point(leftDot[0], leftDot[1]), new Scalar(0, 255, 0), 3);
+                    line(currFrame.getFrame(), new Point(rightDot[0], rightDot[1]), new Point(rightDot[0], rightDot[1]), new Scalar(0, 255, 0), 3);
+                    line(currFrame.getFrame(), new Point(1100, 1500), new Point(1100, 1500), new Scalar(0, 255, 0), 3);
+                    line(currFrame.getFrame(), new Point(1200, 1500), new Point(1200, 1500), new Scalar(0, 255, 0), 3);
+
+
+
+
+
+
+//                    rectangle(currFrame.getFrame(),
+//                            new Point(1000, 1500),
+//                            new Point(1300, 2000),
+//                            new Scalar(0, 255, 0));
+//                    rectangle(currFrame.getFrame(),
+//                            new Point(1000, 1500),
+//                            new Point(1600, 2000),
+//                            new Scalar(0, 255, 0),
+//                            5);
+
                     Image imageToShow = Utils.mat2Image(otsu
-                            //.getROI(new Rect(1000, 1500, 500, 500), true)
-                            //.getOtsu()
                             .getFrame()
                     );
 
                     updateImageView(Frame, imageToShow);
-
-                    prevFrame.setFrame(currFrame.getFrame().clone());
                 };
 
                 this.timer = Executors.newSingleThreadScheduledExecutor();
-                this.timer.scheduleAtFixedRate(frameGrabber, 0, 1000, TimeUnit.MILLISECONDS);
+                this.timer.scheduleAtFixedRate(frameGrabber, 0, 2000, TimeUnit.MILLISECONDS);
 
                 this.button.setText("Stop");
             } else {

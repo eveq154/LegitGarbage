@@ -37,23 +37,25 @@ public class Line {
              , x2 = this.getDots()[2]
              , y2 = this.getDots()[3];
 
-        return Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+        return Math.abs(Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI);
     }
 
-    public int calcDistanceTo(Line l) {
-        double distance = 0.0;
-        try {
-            double xDiff = Math.pow(this.getDots()[0], 2) - Math.pow(l.getDots()[0], 2);
-            double yDiff = Math.pow(this.getDots()[2], 2) - Math.pow(l.getDots()[2], 2);
+    public boolean contains(double X, double Y){
+        // (x2 - x1)(y - y1) == (y2 - y1)(x - x1)
+        double x1 = this.getDots()[0];
+        double y1 = this.getDots()[1];
+        double x2 = this.getDots()[2];
+        double y2 = this.getDots()[3];
 
-            if (xDiff == yDiff)
-                distance = Math.sqrt(xDiff + yDiff);
-            else
-                distance = -1;
+        //double val = Math.abs((x2 - x1) * (Y - y1) - (y2 - y1) * (X - x1));
+        return (x2 - x1) * (Y - y1) == (y2 - y1) * (X - x1);
+    }
 
-        } catch (Exception e) {
-            System.err.println("Something went wrong in euclideanDistance function");
-        }
-        return (int)distance;
+    @Override
+    public String  toString() {
+        return "Line{" +
+                "dots=(" + Arrays.toString(this.getDots()) +
+                ", slope=" + slope +
+                '}';
     }
 }

@@ -81,8 +81,8 @@ public class MyFrame {
 
         Imgproc.threshold(gray, dst, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
 
-        Imgproc.dilate(dst, dst, new Mat(), new Point(-1, -1), 4);
-        Imgproc.erode(dst, dst, new Mat(), new Point(-1, -1), 4);
+        Imgproc.dilate(dst, dst, new Mat(), new Point(-1, -1), 3);
+        Imgproc.erode(dst, dst, new Mat(), new Point(-1, -1), 3);
 
         return new MyFrame(dst);
     }
@@ -136,7 +136,7 @@ public class MyFrame {
 
             Imgproc.warpAffine(this.getFrame(), corrected, correctionMat, this.getFrame().size());
         } catch (Exception ignored) {
-            System.err.println("сука проклятая");
+            System.err.println("Все пошло по пизде");
         }
 
     }
@@ -158,7 +158,7 @@ public class MyFrame {
         HoughLinesP(this.
                 getOtsu().
                 getROI(roi, false).
-                getFrame(), linesP, 1, 2 * PI /180, 50, 400, 0);
+                getFrame(), linesP, 1, 2 * PI /180, 50, 100, 0);
 
         for (int i = 0; i < linesP.cols(); i++) {
             for (int j = 0; j < linesP.rows(); j++) {
@@ -175,9 +175,9 @@ public class MyFrame {
         Mat linesP = new Mat();
 
         Imgproc.HoughLinesP(this.
-                getAT().
+                //getAT().
                 getROI(roi, false).
-                getFrame(), linesP, 1, PI / 180, 20, 100, 10);
+                getFrame(), linesP, 1, PI / 180, 20, 300, 10);
 
 
         for (int i = 0; i < linesP.cols(); i++) {
